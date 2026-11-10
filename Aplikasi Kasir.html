@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kasir</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--text:#1d2330;--muted:#6b7280;--line:#e5e7eb;--primary:#2563eb;--pt:#fff;--danger:#dc2626;--ok:#16a34a;--warn:#d97706}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1115;--card:#181b22;--text:#e8eaf0;--muted:#9aa3b2;--line:#2a2f3a;--primary:#3b82f6}}
+:root[data-theme="dark"]{--bg:#0f1115;--card:#181b22;--text:#e8eaf0;--muted:#9aa3b2;--line:#2a2f3a;--primary:#3b82f6}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100%;font-size:14px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);padding:7px 11px;border-radius:8px;white-space:nowrap}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.on{background:var(--primary);color:var(--pt);border-color:var(--primary)}
+button.primary{background:var(--primary);color:var(--pt);border-color:var(--primary);font-weight:600}
+button.big{width:100%;padding:12px;font-size:15px;margin-top:8px}
+button.ghost{background:transparent;width:100%;margin-top:6px}
+button.danger{color:var(--danger)}
+button.sm{padding:4px 9px;font-size:12px}
+input,select,textarea{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+label{display:block;margin:8px 0;font-size:13px;color:var(--muted)}
+label input,label select{margin-top:4px;color:var(--text)}
+a{color:var(--primary)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.muted{color:var(--muted);font-size:12px}
+.low,.warn{color:var(--warn);font-weight:600}
+.neg{color:var(--danger);font-weight:600}
+.ok{color:var(--ok);font-weight:600}
+.row{display:flex;gap:6px;align-items:center}
+.between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.item{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.list{display:flex;flex-direction:column;gap:6px}
+.posgrid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:860px){.posgrid{grid-template-columns:1fr 360px}.cart{position:sticky;top:12px;align-self:start}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.prod{text-align:left;padding:10px;display:flex;flex-direction:column;gap:4px;min-height:86px}
+.prod b{font-size:13px;line-height:1.25}
+.prod .pr{color:var(--primary);font-weight:600;margin-top:auto}
+.prod.out{opacity:.45}
+.line{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.qty{display:flex;align-items:center;gap:6px;margin-top:4px}
+.tot{display:flex;justify-content:space-between;padding:3px 0}
+.tot.big{font-size:18px;font-weight:700;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0}
+.stat b{display:block;font-size:17px;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+@media(min-width:760px){.grid2{grid-template-columns:1fr 1fr}}
+.bdg{font-size:11px;padding:2px 6px;border-radius:6px;background:var(--line)}
+.void{opacity:.5;text-decoration:line-through}
+.bars{display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:8px}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:10px;color:var(--muted)}
+.bar i{width:100%;background:var(--primary);border-radius:6px 6px 0 0;min-height:2px;display:block}
+table{width:100%;border-collapse:collapse}
+td,th{padding:6px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
+.hide{display:none!important}
+.tab{display:none}.tab.on{display:block}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+nav{display:flex;gap:4px;overflow-x:auto;max-width:100%}
+main{padding:12px;max-width:1200px;margin:0 auto}
+#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.auth{width:100%;max-width:380px}
+.auth h3{margin:4px 0 8px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+#modal.on{display:flex}
+#modalBox{background:var(--card);color:var(--text);border-radius:14px;max-width:380px;width:100%;max-height:90vh;overflow:auto;padding:16px}
+#receipt{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#111;background:#fff;padding:12px;border-radius:6px}
+#receipt .c{text-align:center}#receipt .d{border-top:1px dashed #999;margin:6px 0}#receipt .r{display:flex;justify-content:space-between;gap:8px}
+video{width:100%;border-radius:10px;background:#000}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw}
+#toast.on{opacity:1}
+@media print{body *{visibility:hidden}#modal,#modal *{visibility:visible}#modal{position:absolute;left:0;top:0;background:none;display:block;padding:0}#modalBox{box-shadow:none;max-width:80mm;padding:0;background:#fff;color:#000;max-height:none}#modalBox>*:not(#receipt){display:none}}
+</style>
+</head>
+<body>
+
+<section id="auth">
+  <div class="card auth">
+    <div style="font-size:20px;font-weight:700;text-align:center">🧾 Kasir</div>
+    <form id="loginForm" class="hide">
+      <h3>Masuk</h3>
+      <label>Email<input id="lEmail" type="email" autocomplete="username" required></label>
+      <label>Sandi<input id="lPass" type="password" autocomplete="current-password" required></label>
+      <button class="primary big" type="submit">Masuk</button>
+      <p class="muted" style="text-align:center">Belum punya akun? <a href="#" data-act="toReg">Daftar</a></p>
+    </form>
+    <form id="regForm" class="hide">
+      <h3>Daftar akun</h3>
+      <label>Nama kasir<input id="rName" required></label>
+      <label>Email<input id="rEmail" type="email" autocomplete="username" required></label>
+      <label>Sandi (min. 6 karakter)<input id="rPass" type="password" autocomplete="new-password" required></label>
+      <button class="primary big" type="submit">Daftar</button>
+      <p class="muted" style="text-align:center">Sudah punya akun? <a href="#" data-act="toLogin">Masuk</a></p>
+    </form>
+  </div>
+</section>
+
+<div id="app" class="hide">
+<header>
+  <div><b id="storeName">Kasir</b> <span class="muted" id="who"></span></div>
+  <nav>
+    <button data-tab="pos" class="on">Kasir</button>
+    <button data-tab="dash">Beranda</button>
+    <button data-tab="prod">Produk</button>
+    <button data-tab="hist">Riwayat</button>
+    <button data-tab="set">Pengaturan</button>
+    <button data-act="logout" class="danger">Keluar</button>
+  </nav>
+</header>
+
+<main>
+  <!-- KASIR -->
+  <section id="pos" class="tab on">
+    <div class="posgrid">
+      <div>
+        <div class="row">
+          <input id="q" placeholder="Cari nama / SKU, atau scan barcode lalu Enter" autocomplete="off">
+          <button data-act="cam" title="Scan pakai kamera">📷 Scan</button>
+        </div>
+        <div id="cats" class="chips"></div>
+        <div id="grid" class="grid"></div>
+      </div>
+      <aside class="cart card">
+        <div class="between"><b>Keranjang</b><span id="cartCount" class="muted"></span></div>
+        <div id="cartList"></div>
+        <div class="row" style="margin-top:8px">
+          <select id="discType" style="flex:0 0 110px"><option value="rp">Diskon Rp</option><option value="pct">Diskon %</option></select>
+          <input id="discVal" type="number" min="0" placeholder="0">
+        </div>
+        <div id="totals" style="margin-top:8px"></div>
+        <label>Metode bayar
+          <select id="method">
+            <option value="cash">Tunai</option>
+            <option value="qris">QRIS</option>
+            <option value="transfer">Transfer</option>
+            <option value="debit">Kartu Debit</option>
+          </select>
+        </label>
+        <div id="cashBox">
+          <label>Uang diterima<input id="paid" type="number" min="0" placeholder="0"></label>
+          <div class="chips">
+            <button data-act="quick" data-v="0" class="sm">Uang pas</button>
+            <button data-act="quick" data-v="20000" class="sm">20rb</button>
+            <button data-act="quick" data-v="50000" class="sm">50rb</button>
+            <button data-act="quick" data-v="100000" class="sm">100rb</button>
+          </div>
+        </div>
+        <div id="change" class="tot big" style="display:none"></div>
+        <button class="primary big" data-act="pay" id="pay">Bayar</button>
+        <button class="ghost" data-act="clearCart">Kosongkan keranjang</button>
+      </aside>
+    </div>
+  </section>
+
+  <!-- BERANDA -->
+  <section id="dash" class="tab">
+    <div class="between">
+      <b>Ringkasan</b>
+      <div class="chips" id="rangeChips" style="margin:0"></div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="grid2">
+      <div class="card">
+        <b>Omzet 7 hari terakhir</b>
+        <div id="chart"></div>
+      </div>
+      <div class="card">
+        <b>Stok</b>
+        <div class="stats" id="stockStats" style="margin:8px 0"></div>
+        <b>Yang menipis</b>
+        <div id="low" class="list" style="margin:6px 0 12px"></div>
+        <b>Yang habis</b>
+        <div id="out" class="list" style="margin-top:6px"></div>
+      </div>
+      <div class="card">
+        <b>Kategori paling laku</b>
+        <div class="muted">Berdasarkan jumlah terjual pada periode yang dipilih</div>
+        <div id="catList" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <b>Produk terlaris & metode bayar</b>
+        <div id="topProd" style="margin-top:8px"></div>
+        <div id="byMethod" class="list" style="margin-top:10px"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="between"><b>Omzet & untung harian</b><button data-act="csv">Lihat data CSV</button></div>
+      <div id="daily" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- PRODUK -->
+  <section id="prod" class="tab">
+    <div class="posgrid">
+      <div class="card">
+        <div class="between"><b>Daftar produk</b><span class="muted" id="prodCount"></span></div>
+        <input id="pSearch" placeholder="Cari nama / SKU / barcode..." style="margin-top:8px">
+        <div id="prodList" class="list" style="margin-top:8px"></div>
+      </div>
+      <div class="card" style="height:fit-content">
+        <b id="formTitle">Tambah produk</b>
+        <label>Nama produk<input id="pName"></label>
+        <div class="row">
+          <label style="flex:1">SKU<input id="pSku"></label>
+          <label style="flex:1">Barcode<input id="pBar"></label>
+        </div>
+        <label>Kategori<select id="pCat"></select></label>
+        <div class="row">
+          <label style="flex:1">Harga jual<input id="pPrice" type="number" min="0"></label>
+          <label style="flex:1">Harga modal<input id="pCost" type="number" min="0"></label>
+        </div>
+        <label>Stok<input id="pStock" type="number" min="0"></label>
+        <button class="primary big" data-act="saveProd">Simpan produk</button>
+        <button class="ghost" data-act="resetProd">Batal / kosongkan form</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIWAYAT -->
+  <section id="hist" class="tab">
+    <div class="card">
+      <b>Riwayat transaksi</b>
+      <input id="hSearch" placeholder="Cari no. invoice..." style="margin-top:8px">
+      <div id="histList" class="list" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- PENGATURAN -->
+  <section id="set" class="tab">
+    <div class="card" style="max-width:520px">
+      <b>Pengaturan toko</b>
+      <label>Nama toko<input id="sStore"></label>
+      <label>Pajak (PPN) %<input id="sTax" type="number" min="0" max="100"></label>
+      <label>Batas stok menipis<input id="sLow" type="number" min="0"></label>
+      <label>Kategori (pisahkan dengan koma)<input id="sCats"></label>
+      <button class="primary big" data-act="saveSet">Simpan pengaturan</button>
+      <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+      <b>Data</b>
+      <p class="muted">Data disimpan di browser perangkat ini.</p>
+      <button class="ghost danger" data-act="reset" style="border:1px solid var(--line)">Reset semua data</button>
+    </div>
+  </section>
+</main>
+</div>
+
+<div id="modal"><div id="modalBox"></div></div>
+<div id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const rp = n => "Rp " + Math.round(n || 0).toLocaleString("id-ID");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const num = v => parseFloat(v) || 0;
+const hash = s => { let h = 5381; for (const c of s) h = ((h << 5) + h + c.charCodeAt(0)) | 0; return String(h); };
+const KEY = "kasir-app-v2", UKEY = "kasir-users", SKEY = "kasir-session";
+const card = (l, v) => `<div class="card stat"><span class="muted">${l}</span><b>${v}</b></div>`;
+const dayKey = d => new Date(d).toDateString();
+const profitOf = s => (s.sub - s.disc) - s.items.reduce((a, i) => a + i.cost * i.qty, 0);
+const MN = {cash: "Tunai", qris: "QRIS", transfer: "Transfer", debit: "Kartu Debit"};
+const RL = {today: "hari ini", "7": "7 hari", "30": "30 hari", all: "semua"};
+
+let db, me = null, cart = [], curCat = "Semua", editId = null, range = "today", histQ = "";
+let stream = null, detTimer = null;
+const armed = {};
+
+/* ---------- STORAGE ---------- */
+const users = () => { try { return JSON.parse(localStorage.getItem(UKEY)) || []; } catch (e) { return []; } };
+function seed() {
+  const mk = (name, sku, barcode, cat, price, cost, stock) => ({id: uid(), name, sku, barcode, cat, price, cost, stock});
+  return {
+    store: "Toko Saya", tax: 0, lowStock: 5, cats: ["Makanan", "Minuman", "Lainnya"],
+    products: [
+      mk("Nasi Goreng", "NG01", "8990001", "Makanan", 15000, 9000, 20),
+      mk("Mie Ayam", "MA01", "8990002", "Makanan", 13000, 7500, 15),
+      mk("Es Teh", "ET01", "8990003", "Minuman", 5000, 1500, 40),
+      mk("Kopi Susu", "KS01", "8990004", "Minuman", 12000, 5000, 4),
+      mk("Kerupuk", "KR01", "8990005", "Lainnya", 2000, 1000, 0)
+    ],
+    sales: []
+  };
+}
+function loadDb() { try { db = JSON.parse(localStorage.getItem(KEY)); } catch (e) { db = null; } if (!db) db = seed(); }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast("Penyimpanan tidak tersedia"); } }
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2300);
+}
+
+/* ---------- AUTH ---------- */
+function showAuth(which) {
+  $("#auth").classList.remove("hide"); $("#app").classList.add("hide");
+  $("#loginForm").classList.toggle("hide", which !== "login");
+  $("#regForm").classList.toggle("hide", which !== "reg");
+}
+function login(u) {
+  me = {name: u.name, email: u.email};
+  try { localStorage.setItem(SKEY, JSON.stringify(me)); } catch (e) {}
+  $("#who").textContent = "· " + me.name;
+  $("#auth").classList.add("hide"); $("#app").classList.remove("hide");
+  $("#lPass").value = ""; $("#rPass").value = "";
+  showTab("pos"); renderAll();
+}
+function logout() {
+  me = null; cart = [];
+  try { localStorage.removeItem(SKEY); } catch (e) {}
+  showAuth("login"); toast("Anda sudah keluar");
+}
+$("#regForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("#rName").value.trim(), email = $("#rEmail").value.trim().toLowerCase(), pass = $("#rPass").value;
+  if (!name) return toast("Nama kasir wajib diisi");
+  if (pass.length < 6) return toast("Sandi minimal 6 karakter");
+  const us = users();
+  if (us.some(u => u.email === email)) return toast("Email sudah terdaftar, silakan masuk");
+  const u = {name, email, h: hash(pass)};
+  us.push(u);
+  try { localStorage.setItem(UKEY, JSON.stringify(us)); } catch (err) { return toast("Penyimpanan tidak tersedia"); }
+  login(u); toast("Akun dibuat. Selamat datang, " + name);
+});
+$("#loginForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const email = $("#lEmail").value.trim().toLowerCase(), pass = $("#lPass").value;
+  const u = users().find(x => x.email === email);
+  if (!u || u.h !== hash(pass)) return toast("Email atau sandi salah");
+  login(u);
+});
+
+/* ---------- NAVIGASI ---------- */
+function showTab(id) {
+  document.querySelectorAll(".tab").forEach(s => s.classList.toggle("on", s.id === id));
+  document.querySelectorAll("nav button[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === id));
+  if (id === "dash") renderDash();
+  if (id === "hist") renderHistory();
+  if (id === "set") renderSettings();
+}
+
+/* ---------- KASIR ---------- */
+function renderCats() {
+  $("#cats").innerHTML = ["Semua", ...db.cats].map(c =>
+    `<button class="sm ${c === curCat ? "on" : ""}" data-act="cat" data-v="${esc(c)}">${esc(c)}</button>`).join("");
+}
+function renderGrid() {
+  const q = $("#q").value.trim().toLowerCase();
+  const list = db.products.filter(p =>
+    (curCat === "Semua" || p.cat === curCat) &&
+    (!q || p.name.toLowerCase().includes(q) || (p.sku || "").toLowerCase().includes(q) || (p.barcode || "").includes(q)));
+  $("#grid").innerHTML = list.length ? list.map(p => {
+    const out = p.stock <= 0, low = !out && p.stock <= db.lowStock;
+    return `<button class="prod ${out ? "out" : ""}" data-act="add" data-id="${p.id}" ${out ? "disabled" : ""}>
+      <b>${esc(p.name)}</b>
+      <span class="muted ${low ? "low" : ""}">${out ? "Habis" : "Stok " + p.stock}</span>
+      <span class="pr">${rp(p.price)}</span></button>`;
+  }).join("") : `<div class="muted">Produk tidak ditemukan. Tambah di tab Produk.</div>`;
+}
+function calc() {
+  const items = cart.map(l => {
+    const p = db.products.find(x => x.id === l.id);
+    return p ? {...p, qty: l.qty} : null;
+  }).filter(Boolean);
+  const sub = items.reduce((a, i) => a + i.price * i.qty, 0);
+  let d = $("#discType").value === "pct" ? sub * num($("#discVal").value) / 100 : num($("#discVal").value);
+  d = Math.min(sub, Math.max(0, Math.round(d)));
+  const base = sub - d, tax = Math.round(base * (db.tax || 0) / 100);
+  return {items, sub, d, tax, total: base + tax};
+}
+function renderCart() {
+  const t = calc();
+  $("#cartCount").textContent = t.items.length ? t.items.reduce((a, i) => a + i.qty, 0) + " item" : "";
+  $("#cartList").innerHTML = t.items.length ? t.items.map(i => `
+    <div class="line">
+      <div><b>${esc(i.name)}</b><div class="muted">${rp(i.price)} × ${i.qty}</div>
+        <div class="qty"><button class="sm" data-act="dec" data-id="${i.id}">−</button><span>${i.qty}</span><button class="sm" data-act="inc" data-id="${i.id}">+</button></div></div>
+      <div style="text-align:right"><b>${rp(i.price * i.qty)}</b><div><button class="sm danger" data-act="rm" data-id="${i.id}">Hapus</button></div></div>
+    </div>`).join("") : `<div class="muted" style="padding:14px 0">Keranjang kosong. Tap produk untuk memilih.</div>`;
+  $("#totals").innerHTML = `
+    <div class="tot"><span>Subtotal</span><span>${rp(t.sub)}</span></div>
+    <div class="tot"><span>Diskon</span><span>− ${rp(t.d)}</span></div>
+    <div class="tot"><span>Pajak ${db.tax || 0}%</span><span>${rp(t.tax)}</span></div>
+    <div class="tot big"><span>Total</span><span>${rp(t.total)}</span></div>`;
+  const cash = $("#method").value === "cash";
+  $("#cashBox").style.display = cash ? "block" : "none";
+  const ch = $("#change");
+  if (cash && t.items.length) {
+    const paid = num($("#paid").value);
+    ch.style.display = "flex";
+    ch.innerHTML = paid >= t.total
+      ? `<span>Kembalian</span><span class="ok">${rp(paid - t.total)}</span>`
+      : `<span>Kurang</span><span class="neg">${rp(t.total - paid)}</span>`;
+  } else ch.style.display = "none";
+  $("#pay").disabled = !t.items.length;
+}
+function addToCart(id) {
+  const p = db.products.find(x => x.id === id);
+  if (!p) return;
+  const line = cart.find(l => l.id === id);
+  if ((line ? line.qty : 0) + 1 > p.stock) return toast("Stok " + p.name + " tidak cukup");
+  if (line) line.qty++; else cart.push({id, qty: 1});
+  renderCart();
+}
+function checkout() {
+  const t = calc();
+  if (!t.items.length) return;
+  for (const i of t.items) if (i.qty > i.stock) return toast("Stok " + i.name + " tidak cukup");
+  const method = $("#method").value;
+  const paid = method === "cash" ? num($("#paid").value) : t.total;
+  if (paid < t.total) return toast("Uang diterima kurang");
+  const now = new Date();
+  const seq = db.sales.filter(s => dayKey(s.date) === now.toDateString()).length + 1;
+  const sale = {
+    id: uid(),
+    no: "INV-" + now.toISOString().slice(0, 10).replace(/-/g, "") + "-" + String(seq).padStart(3, "0"),
+    date: now.toISOString(), kasir: me ? me.name : "-",
+    items: t.items.map(i => ({id: i.id, name: i.name, cat: i.cat, price: i.price, cost: i.cost, qty: i.qty})),
+    sub: t.sub, disc: t.d, tax: t.tax, total: t.total, method, paid, change: paid - t.total, void: false
+  };
+  t.items.forEach(i => { const p = db.products.find(x => x.id === i.id); if (p) p.stock -= i.qty; });
+  db.sales.unshift(sale);
+  save();
+  cart = []; $("#paid").value = ""; $("#discVal").value = "";
+  renderAll();
+  toast("Transaksi tersimpan");
+  showReceipt(sale);
+}
+function receiptHTML(s) {
+  const lines = s.items.map(i => `<div>${esc(i.name)}</div><div class="r"><span>${i.qty} × ${rp(i.price)}</span><span>${rp(i.qty * i.price)}</span></div>`).join("");
+  return `<div id="receipt">
+    <div class="c"><b>${esc(db.store)}</b><div>${new Date(s.date).toLocaleString("id-ID")}</div><div>${esc(s.no)}</div><div>Kasir: ${esc(s.kasir)}</div></div>
+    <div class="d"></div>${lines}<div class="d"></div>
+    <div class="r"><span>Subtotal</span><span>${rp(s.sub)}</span></div>
+    ${s.disc ? `<div class="r"><span>Diskon</span><span>−${rp(s.disc)}</span></div>` : ""}
+    ${s.tax ? `<div class="r"><span>Pajak</span><span>${rp(s.tax)}</span></div>` : ""}
+    <div class="r"><b>TOTAL</b><b>${rp(s.total)}</b></div>
+    <div class="r"><span>${MN[s.method]}</span><span>${rp(s.paid)}</span></div>
+    ${s.method === "cash" ? `<div class="r"><span>Kembali</span><span>${rp(s.change)}</span></div>` : ""}
+    <div class="d"></div><div class="c">Terima kasih!</div>
+  </div>
+  <div class="row" style="margin-top:12px"><button class="primary" data-act="print">Cetak</button><button data-act="closeModal">Tutup</button></div>`;
+}
+function showReceipt(s) { openModal(receiptHTML(s)); }
+function openModal(html) { $("#modalBox").innerHTML = html; $("#modal").classList.add("on"); }
+function closeModal() {
+  clearInterval(detTimer);
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  $("#modal").classList.remove("on");
+}
+
+/* ---------- SCAN ---------- */
+function findByCode(code) { return db.products.find(x => x.barcode === code || x.sku === code); }
+$("#q").addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  const v = $("#q").value.trim();
+  if (!v) return;
+  const p = findByCode(v);
+  if (p) { addToCart(p.id); $("#q").value = ""; renderGrid(); }
+  else toast("Barcode/SKU tidak ditemukan: " + v);
+});
+async function camScan() {
+  if (!("BarcodeDetector" in window) || !navigator.mediaDevices) return toast("Scan kamera tidak didukung di sini. Pakai scanner USB atau ketik kode lalu Enter.");
+  try { stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}}); }
+  catch (err) { return toast("Kamera tidak bisa diakses"); }
+  openModal(`<b>Arahkan kamera ke barcode</b><video id="cam" autoplay playsinline muted></video><button class="ghost" data-act="closeModal">Batal</button>`);
+  const v = $("#cam"); v.srcObject = stream;
+  const det = new BarcodeDetector();
+  detTimer = setInterval(async () => {
+    try {
+      const codes = await det.detect(v);
+      if (!codes.length) return;
+      const code = codes[0].rawValue;
+      closeModal();
+      const p = findByCode(code);
+      if (p) { addToCart(p.id); toast("Ditambahkan: " + p.name); }
+      else toast("Barcode belum terdaftar: " + code);
+    } catch (e) {}
+  }, 400);
+}
+
+/* ---------- PRODUK ---------- */
+function renderProducts() {
+  const q = $("#pSearch").value.trim().toLowerCase();
+  const list = db.products.filter(p => !q || p.name.toLowerCase().includes(q) || (p.sku || "").toLowerCase().includes(q) || (p.barcode || "").includes(q));
+  $("#prodCount").textContent = db.products.length + " produk";
+  $("#prodList").innerHTML = list.length ? list.map(p => `
+    <div class="card item">
+      <div style="flex:1;min-width:160px">
+        <b>${esc(p.name)}</b> <span class="bdg">${esc(p.cat)}</span>
+        <div class="muted">${esc(p.sku) || "-"} · ${esc(p.barcode) || "tanpa barcode"} · Jual ${rp(p.price)} · Modal ${rp(p.cost)}</div>
+        <div class="${p.stock <= 0 ? "neg" : p.stock <= db.lowStock ? "low" : "muted"}">Stok: ${p.stock}${p.stock <= 0 ? " (habis)" : p.stock <= db.lowStock ? " (menipis)" : ""}</div>
+      </div>
+      <div class="row" style="flex:0 0 auto;gap:4px;flex-wrap:wrap">
+        <button class="sm" data-act="stk" data-id="${p.id}" data-d="-1">−1</button>
+        <button class="sm" data-act="stk" data-id="${p.id}" data-d="1">+1</button>
+        <button class="sm" data-act="edit" data-id="${p.id}">Edit</button>
+        <button class="sm danger" data-act="delProd" data-id="${p.id}">Hapus</button>
+      </div>
+    </div>`).join("") : `<div class="muted">Belum ada produk.</div>`;
+}
+function fillCatSelect() { $("#pCat").innerHTML = db.cats.map(c => `<option>${esc(c)}</option>`).join(""); }
+function clearProdForm() {
+  editId = null;
+  ["#pName", "#pSku", "#pBar", "#pPrice", "#pCost", "#pStock"].forEach(s => $(s).value = "");
+  $("#formTitle").textContent = "Tambah produk";
+}
+function editProd(id) {
+  const p = db.products.find(x => x.id === id);
+  if (!p) return;
+  editId = id;
+  $("#pName").value = p.name; $("#pSku").value = p.sku || ""; $("#pBar").value = p.barcode || "";
+  $("#pCat").value = p.cat; $("#pPrice").value = p.price; $("#pCost").value = p.cost; $("#pStock").value = p.stock;
+  $("#formTitle").textContent = "Edit produk";
+  $("#pName").focus();
+}
+function saveProd() {
+  const name = $("#pName").value.trim();
+  if (!name) return toast("Nama produk wajib diisi");
+  const bar = $("#pBar").value.trim();
+  if (bar && db.products.some(p => p.barcode === bar && p.id !== editId)) return toast("Barcode sudah dipakai produk lain");
+  const data = {
+    name, sku: $("#pSku").value.trim(), barcode: bar, cat: $("#pCat").value,
+    price: Math.max(0, num($("#pPrice").value)), cost: Math.max(0, num($("#pCost").value)),
+    stock: Math.max(0, Math.round(num($("#pStock").value)))
+  };
+  if (editId) Object.assign(db.products.find(x => x.id === editId), data);
+  else db.products.push({id: uid(), ...data});
+  save(); clearProdForm(); renderAll();
+  toast("Produk disimpan");
+}
+
+/* ---------- RIWAYAT ---------- */
+function renderHistory() {
+  const q = histQ.toLowerCase();
+  const list = db.sales.filter(s => !q || s.no.toLowerCase().includes(q)).slice(0, 200);
+  $("#histList").innerHTML = list.length ? list.map(s => `
+    <div class="card item ${s.void ? "void" : ""}">
+      <div style="flex:1;min-width:160px">
+        <b>${esc(s.no)}</b> ${s.void ? `<span class="bdg">BATAL</span>` : ""}
+        <div class="muted">${new Date(s.date).toLocaleString("id-ID")} · ${esc(s.kasir || "-")} · ${MN[s.method]}</div>
+      </div>
+      <b>${rp(s.total)}</b>
+      <div class="row" style="flex:0 0 auto;gap:4px">
+        <button class="sm" data-act="rcpt" data-id="${s.id}">Struk</button>
+        ${s.void ? "" : `<button class="sm danger" data-act="void" data-id="${s.id}">Batalkan</button>`}
+      </div>
+    </div>`).join("") : `<div class="muted">Belum ada transaksi.</div>`;
+}
+function voidSale(id) {
+  const s = db.sales.find(x => x.id === id);
+  if (!s || s.void) return;
+  s.items.forEach(i => { const p = db.products.find(x => x.id === i.id); if (p) p.stock += i.qty; });
+  s.void = true; save(); renderAll();
+  toast("Transaksi dibatalkan, stok dikembalikan");
+}
+
+/* ---------- BERANDA ---------- */
+function inRange(s) {
+  if (range === "all") return true;
+  if (range === "today") return dayKey(s.date) === new Date().toDateString();
+  return (Date.now() - new Date(s.date)) <= (range === "7" ? 7 : 30) * 864e5;
+}
+function renderDash() {
+  $("#rangeChips").innerHTML = Object.entries(RL).map(([k, l]) =>
+    `<button class="sm ${range === k ? "on" : ""}" data-act="range" data-v="${k}">${l.replace(/^./, c => c.toUpperCase())}</button>`).join("");
+  const live = db.sales.filter(s => !s.void);
+  const todayS = live.filter(s => dayKey(s.date) === new Date().toDateString());
+  const per = live.filter(inRange);
+  const sumT = (l, f) => l.reduce((a, s) => a + f(s), 0);
+  $("#stats").innerHTML = [
+    card("Omzet hari ini", rp(sumT(todayS, s => s.total))),
+    card("Untung hari ini", rp(sumT(todayS, profitOf))),
+    card("Transaksi hari ini", todayS.length),
+    card("Omzet (" + RL[range] + ")", rp(sumT(per, s => s.total))),
+    card("Untung (" + RL[range] + ")", rp(sumT(per, profitOf)))
+  ].join("");
+
+  const modal = db.products.reduce((a, p) => a + p.cost * p.stock, 0);
+  const nilaiJual = db.products.reduce((a, p) => a + p.price * p.stock, 0);
+  const totItem = db.products.reduce((a, p) => a + p.stock, 0);
+  $("#stockStats").innerHTML = [card("Nilai stok (modal)", rp(modal)), card("Nilai jual stok", rp(nilaiJual)), card("Total item", totItem)].join("");
+  const low = db.products.filter(p => p.stock > 0 && p.stock <= db.lowStock).sort((a, b) => a.stock - b.stock);
+  const out = db.products.filter(p => p.stock <= 0);
+  $("#low").innerHTML = low.length ? low.map(p => `<div class="item"><span>${esc(p.name)}</span><span class="low">sisa ${p.stock}</span></div>`).join("") : `<div class="muted">Tidak ada</div>`;
+  $("#out").innerHTML = out.length ? out.map(p => `<div class="item"><span>${esc(p.name)}</span><span class="neg">Habis</span></div>`).join("") : `<div class="muted">Tidak ada</div>`;
+
+  const days = [...Array(7)].map((_, k) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (6 - k)); return d; });
+  const rows = days.map(d => {
+    const ss = live.filter(s => dayKey(s.date) === d.toDateString());
+    return {d, trx: ss.length, omzet: sumT(ss, s => s.total), untung: sumT(ss, profitOf)};
+  });
+  const max = Math.max(1, ...rows.map(r => r.omzet));
+  $("#chart").innerHTML = `<div class="bars">${rows.map(r => `<div class="bar"><span>${r.omzet ? Math.round(r.omzet / 1000) + "rb" : ""}</span><i style="height:${Math.max(2, r.omzet / max * 85)}px"></i><span>${r.d.toLocaleDateString("id-ID", {weekday: "short"})}</span></div>`).join("")}</div>`;
+  $("#daily").innerHTML = `<table><tr><th>Tanggal</th><th>Trx</th><th>Omzet</th><th>Untung</th></tr>` +
+    rows.slice().reverse().map(r => `<tr><td>${r.d.toLocaleDateString("id-ID", {weekday: "short", day: "numeric", month: "short"})}</td><td>${r.trx}</td><td>${rp(r.omzet)}</td><td class="${r.untung < 0 ? "neg" : "ok"}">${rp(r.untung)}</td></tr>`).join("") + `</table>`;
+
+  const cat = {}, prod = {}, met = {};
+  per.forEach(s => {
+    met[s.method] = (met[s.method] || 0) + s.total;
+    s.items.forEach(i => {
+      const c = i.cat || "Lainnya";
+      cat[c] = cat[c] || {qty: 0, rev: 0}; cat[c].qty += i.qty; cat[c].rev += i.price * i.qty;
+      prod[i.id] = prod[i.id] || {name: i.name, qty: 0, rev: 0}; prod[i.id].qty += i.qty; prod[i.id].rev += i.price * i.qty;
+    });
+  });
+  const catList = Object.entries(cat).sort((a, b) => b[1].qty - a[1].qty);
+  $("#catList").innerHTML = catList.length ? catList.map(([k, v], idx) =>
+    `<div class="item"><span>${idx === 0 ? "🏆 " : ""}${esc(k)}</span><span>${v.qty} terjual · ${rp(v.rev)}</span></div>`).join("") : `<div class="muted">Belum ada penjualan.</div>`;
+  const top = Object.values(prod).sort((a, b) => b.qty - a.qty).slice(0, 6);
+  $("#topProd").innerHTML = top.length ? `<table><tr><th>Produk</th><th>Qty</th><th>Omzet</th></tr>` +
+    top.map(p => `<tr><td>${esc(p.name)}</td><td>${p.qty}</td><td>${rp(p.rev)}</td></tr>`).join("") + `</table>` : `<div class="muted">Belum ada penjualan.</div>`;
+  $("#byMethod").innerHTML = Object.keys(MN).map(k => `<div class="item"><span>${MN[k]}</span><b>${rp(met[k] || 0)}</b></div>`).join("");
+}
+function salesCSV() {
+  const rows = [["No", "Tanggal", "Kasir", "Metode", "Item", "Subtotal", "Diskon", "Pajak", "Total", "HPP", "Laba"]];
+  db.sales.filter(s => !s.void && inRange(s)).forEach(s => {
+    const hpp = s.items.reduce((a, i) => a + i.cost * i.qty, 0);
+    rows.push([s.no, new Date(s.date).toLocaleString("id-ID"), s.kasir || "-", MN[s.method],
+      s.items.map(i => `${i.name} x${i.qty}`).join("; "), s.sub, s.disc, s.tax, s.total, hpp, (s.sub - s.disc) - hpp]);
+  });
+  return rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+}
+
+/* ---------- PENGATURAN ---------- */
+function renderSettings() {
+  $("#sStore").value = db.store; $("#sTax").value = db.tax || 0;
+  $("#sLow").value = db.lowStock; $("#sCats").value = db.cats.join(", ");
+}
+function saveSettings() {
+  db.store = $("#sStore").value.trim() || "Toko Saya";
+  db.tax = Math.min(100, Math.max(0, num($("#sTax").value)));
+  db.lowStock = Math.max(0, Math.round(num($("#sLow").value)));
+  const cats = $("#sCats").value.split(",").map(s => s.trim()).filter(Boolean);
+  db.cats = cats.length ? cats : ["Lainnya"];
+  if (curCat !== "Semua" && !db.cats.includes(curCat)) curCat = "Semua";
+  save(); renderAll(); toast("Pengaturan disimpan");
+}
+
+/* ---------- RENDER & EVENT ---------- */
+function renderAll() {
+  $("#storeName").textContent = db.store;
+  fillCatSelect(); renderCats(); renderGrid(); renderCart();
+  renderProducts(); renderHistory();
+  if ($("#dash").classList.contains("on")) renderDash();
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act],[data-tab]");
+  if (!b) return;
+  e.preventDefault();
+  if (b.dataset.tab) return showTab(b.dataset.tab);
+  const a = b.dataset.act, id = b.dataset.id, v = b.dataset.v;
+  switch (a) {
+    case "toReg": showAuth("reg"); break;
+    case "toLogin": showAuth("login"); break;
+    case "logout": logout(); break;
+    case "cam": camScan(); break;
+    case "camStop": case "closeModal": closeModal(); break;
+    case "cat": curCat = v; renderCats(); renderGrid(); break;
+    case "add": addToCart(id); break;
+    case "inc": { const l = cart.find(x => x.id === id), p = db.products.find(x => x.id === id);
+      if (l && p && l.qty + 1 <= p.stock) { l.qty++; renderCart(); } else toast("Stok tidak cukup"); break; }
+    case "dec": { const l = cart.find(x => x.id === id); if (l) { l.qty--; if (l.qty <= 0) cart = cart.filter(x => x.id !== id); } renderCart(); break; }
+    case "rm": cart = cart.filter(x => x.id !== id); renderCart(); break;
+    case "clearCart": cart = []; renderCart(); break;
+    case "quick": $("#paid").value = v === "0" ? calc().total : v; renderCart(); break;
+    case "pay": checkout(); break;
+    case "saveProd": saveProd(); break;
+    case "resetProd": clearProdForm(); break;
+    case "edit": editProd(id); break;
+    case "stk": { const p = db.products.find(x => x.id === id); if (p) { p.stock = Math.max(0, p.stock + num(b.dataset.d)); save(); renderAll(); } break; }
+    case "delProd":
+      if (!armed[id]) { armed[id] = 1; b.textContent = "Yakin?"; setTimeout(() => { delete armed[id]; b.textContent = "Hapus"; }, 3000); break; }
+      db.products = db.products.filter(p => p.id !== id); cart = cart.filter(l => l.id !== id);
+      save(); renderAll(); toast("Produk dihapus"); break;
+    case "rcpt": { const s = db.sales.find(x => x.id === id); if (s) showReceipt(s); break; }
+    case "void":
+      if (!armed[id]) { armed[id] = 1; b.textContent = "Yakin?"; setTimeout(() => { delete armed[id]; b.textContent = "Batalkan"; }, 3000); break; }
+      voidSale(id); break;
+    case "print": try { window.print(); } catch (err) { toast("Cetak tidak tersedia di sini, buka di browser"); } break;
+    case "range": range = v; renderDash(); break;
+    case "csv": openModal(`<b>Data penjualan (CSV)</b><p class="muted">Salin teks ini lalu tempel ke Excel / Google Sheets.</p>
+      <textarea rows="10" readonly onclick="this.select()">${esc(salesCSV())}</textarea>
+      <button class="ghost" data-act="closeModal">Tutup</button>`); break;
+    case "saveSet": saveSettings(); break;
+    case "reset":
+      if (!armed.reset) { armed.reset = 1; b.textContent = "Klik lagi untuk hapus SEMUA data"; setTimeout(() => { delete armed.reset; b.textContent = "Reset semua data"; }, 3000); break; }
+      delete armed.reset; db = seed(); cart = []; curCat = "Semua"; save(); renderAll(); renderSettings(); toast("Data direset"); break;
+  }
+});
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
+["#q", "#discType", "#discVal", "#method", "#paid"].forEach(s => {
+  $(s).addEventListener("input", () => { if (s === "#q") renderGrid(); renderCart(); });
+  $(s).addEventListener("change", () => renderCart());
+});
+$("#pSearch").addEventListener("input", renderProducts);
+$("#hSearch").addEventListener("input", e => { histQ = e.target.value; renderHistory(); });
+
+/* ---------- START ---------- */
+loadDb();
+renderAll();
+try {
+  const s = JSON.parse(localStorage.getItem(SKEY));
+  const u = s && users().find(x => x.email === s.email);
+  if (u) login(u); else showAuth("login");
+} catch (e) { showAuth("login"); }
+</script>
+</body>
+</html>
